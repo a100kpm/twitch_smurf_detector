@@ -3,6 +3,7 @@ import requests
 from PIL import Image
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 
 # http://dotabase.dillerm.io/dota-vpk/panorama
 def get_hero_path_from_dotabase():
@@ -181,11 +182,43 @@ def estimate_threshold_watch_play(stack_img):
         #cut image in half and do the job from there
     return val_min,val_max
 
+
+
+
+#bellow is for a bulk idea of how to proceed to improve detection quality;
+#--> estimate position of each hero image on sceen by searching top bar color position
+def get_ratio_color(im):
+    #get ratio of color for each color bar of heroes
+    a=im[:,:,0]/im[:,:,1]
+    b=im[:,:,0]/im[:,:,2]
+    c=im[:,:,1]/im[:,:,2]
+    test=np.array([a,b,c],ndmin=3)
+    ratio_1_min=np.min(test[0,1:3,:])
+    ratio_1_max=np.max(test[0,1:3,:])
+    ratio_2_min=np.min(test[1,1:3,:])
+    ratio_2_max=np.max(test[1,1:3,:])
+    ratio_3_min=np.min(test[2,1:3,:])
+    ratio_3_max=np.max(test[2,1:3,:])
+    return (ratio_1_min,ratio_1_max,ratio_2_min,ratio_2_max,ratio_3_min,ratio_3_max)
+
+# r=get_ratio_color(im)
+
+def change(image,r):
+    #keep only the part of image in between ratio
+    img=np.zeros([56,864,3])
+    img[(
+        ((image[:,:,0] >= image[:,:,1]*r[0]) & (image[:,:,0] <= image[:,:,1]*r[1]) ) &
+        ((image[:,:,0] >= image[:,:,2]*r[2]) & (image[:,:,0] <= image[:,:,2]*r[3]) ) &
+        ((image[:,:,1] >= image[:,:,2]*r[4]) & (image[:,:,1] <= image[:,:,2]*r[5]) )
+                  )]=255
+    return img
+
 def alternate_estimate_x_hero_positions(stack_img):
     # try to get the alternate x hero positions for resolution way larger and way narrower than "normal" ones
     # not needed for big majority of cases
     # need completion
     dico_ratio_color=load_dictionary_ratio_color()
+    lenn=len(stacl_img)
     for i in range(lenn):
         image=cv2.imdecode(stack_img[i],-1)
         testt=image.copy()
