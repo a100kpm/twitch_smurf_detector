@@ -347,9 +347,13 @@ def associate_player_id(database_entry=database_entry,df=False,hours=6):
 
 def find_smurf_user(df=False):
     '''
+    Parameters
+    ----------
+    df : dataframe containing only twitch_channel with smurfing evidence (in case already loaded)
+
     Returns
     -------
-    df : dataframe contaning only twitch_channel with smurfing evidence
+    df : dataframe containing only twitch_channel with smurfing evidence
 
     '''
     if not type(df)==pd.core.frame.DataFrame:
