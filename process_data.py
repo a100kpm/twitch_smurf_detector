@@ -345,16 +345,17 @@ def associate_player_id(database_entry=database_entry,df=False,hours=6):
     #update the 2 tables of database
                   
 
-def find_smurf_user():
+def find_smurf_user(df=False):
     '''
     Returns
     -------
     df : dataframe contaning only twitch_channel with smurfing evidence
 
     '''
-    conn,engine=connection2(database_entry)
-    df=pd.read_sql_query("select * from player where possible_smurf_id<>''",conn)
-    conn.close()
+    if not type(df)==pd.core.frame.DataFrame:
+        conn,engine=connection2(database_entry)
+        df=pd.read_sql_query("select * from player where possible_smurf_id<>''",conn)
+        conn.close()
     df['most_probable_smurf_id']=''
     lenn=len(df)
     for i in range(lenn):
